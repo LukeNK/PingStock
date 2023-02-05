@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PingStock</title>
+    <style>
+        :root {
+            --color-bg: #04151fff;
+            --color-fg: #efd6acff;
+            --color-theme: #183a37ff;
+            --color-dark: #432534ff;
+            --mahogany: #c44900ff;
+            --font-family: Helvetica, Arial, sans-serif;
+            --font-size: 19px
+        }
+
+        html {
+            font-family: var(--font-family);
+            font-size: var(--font-size);
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-fg);
+        }
+
+        button {
+            border-radius: 0;
+            border: 0px none transparent;
+            background-color: var(--color-theme);
+            color: var(--color-fg);
+            font-family: var(--font-family);
+            font-size: var(--font-size);
+        }
+
+        input {
+            border-radius: 0;
+            border: 0px none transparent;
+            background-color: var(--color-dark);
+            color: var(--color-fg);
+            font-family: var(--font-family);
+            font-size: var(--font-size);
+        }
+    </style>
+</head>
+<body>
+    <button onclick="passStock()">Pass</button>
+    <p>Money: $<span id="playerMoney"></span></p>
+    <dl id="stockList"></dl>
+</body>
+<script>
+    const FETCH_APP = {
+        mode: 'cors',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+    }
+    let elmStockList = document.getElementById('stockList');
+
+    function passStock() {
+        fetch('/pass').then(res => res.json())
+        .then(updateStock)
+        updatePlayer()
+    }
+
+    function updateStock(response) {
+        fetch('/pass').then(res => res.json())
+        .then(res => {
+            // remove old result
+            elmStockList.innerHTML = '';
+            for (const stock of res) {
+                let name = stock.name;
+                elmStockList.innerHTML += `
+                    <dl>
+                        <dt>${name}</dt>
+                        <dd>$${stock.value}</dd>
+                        <dd>
+                            <input id="${name}" type="Number" value="${stock.amount}">
+                            <button onclick="tran('${name}', true)">Buy</button>
+                            <button onclick="tran('${name}', false)">Sell</button>
+                        </dd>
+                    </dl>`;
+            }
+        });
+    }
+
+    function updatePlayer() {
+        fetch('/player').then(res => res.json())
+        .then(res => {
+            document.getElementById('playerMoney').innerHTML = res.money
+        })
+    }
+
+    function tran(name, act) {
+        fetch('/tran', {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                FETCH_APP,
+                name: name, 
+                act: act,
+                amount: document.getElementById(name).value
+            })
+        }).then(res => res.text())
+        .then(passStock)
+    }
+
+    passStock(); // run once before interval
+    setInterval(passStock, 10000);
+</script>
