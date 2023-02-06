@@ -58,13 +58,12 @@
     let elmStockList = document.getElementById('stockList');
 
     function passStock() {
-        fetch('/pass').then(res => res.json())
-        .then(updateStock)
-        updatePlayer()
+        fetch('/pass').then(res => res.text())
+        .then(updateStock())
     }
 
-    function updateStock(response) {
-        fetch('/pass').then(res => res.json())
+    function updateStock() {
+        fetch('/stocks').then(res => res.json())
         .then(res => {
             // remove old result
             elmStockList.innerHTML = '';
@@ -81,7 +80,7 @@
                         </dd>
                     </dl>`;
             }
-        });
+        }).then(updatePlayer());
     }
 
     function updatePlayer() {
@@ -106,9 +105,9 @@
                 amount: document.getElementById(name).value
             })
         }).then(res => res.text())
-        .then(passStock)
+        .then(updateStock())
     }
 
     passStock(); // run once before interval
-    setInterval(passStock, 10000);
+    // setInterval(passStock, 10000);
 </script>

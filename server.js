@@ -60,7 +60,6 @@ app.use(bodyParser.json())
 // information route
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
-    PLAYER.transaction(STOCK_LIST.CAPM, 10);
 });
 
 app.get('/stocks', (req, res) => {
