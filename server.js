@@ -46,7 +46,7 @@ class Client {
 }
 
 // game settings
-const PASSES_PER_DAY = 4; // how many passes for a day for chart
+const PASSES_PER_DAY = 10; // how many passes for a day for chart
 // all stock available
 let STOCK_LIST = {
     CAPM: 'https://pm.gc.ca/en',
