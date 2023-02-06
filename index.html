@@ -8,7 +8,7 @@
             --color-fg: #efd6acff;
             --color-theme: #183a37ff;
             --color-dark: #432534ff;
-            --mahogany: #c44900ff;
+            --color-bright: #c44900ff;
             --font-family: Helvetica, Arial, sans-serif;
             --font-size: 19px
         }
@@ -40,12 +40,33 @@
             font-family: var(--font-family);
             font-size: var(--font-size);
         }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+        }
+        nav button {
+            padding: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        main {
+            padding-top: 2rem;
+        }
     </style>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 </head>
 <body>
-    <button onclick="passStock()">Pass</button>
-    <p>Money: $<span id="playerMoney"></span></p>
-    <dl id="stockList"></dl>
+    <nav>
+        <p>PingStock</p>
+        <button onclick="passStock()">Pass</button>
+    </nav>
+    <main>
+        <p>Money: $<span id="playerMoney"></span></p>
+        <dl id="stockList"></dl>
+    </main>
 </body>
 <script>
     const FETCH_APP = {
@@ -62,6 +83,15 @@
         .then(updateStock())
     }
 
+    function stockHistory(history) {
+        // function to parse for canvas.js
+        let res = []
+        for (const key in history) {
+            const element = history[key];
+            res.push({x: key, y: element})                
+        }
+        return res;
+    }
     function updateStock() {
         fetch('/stocks').then(res => res.json())
         .then(res => {
@@ -69,8 +99,9 @@
             elmStockList.innerHTML = '';
             for (const stock of res) {
                 let name = stock.name;
-                elmStockList.innerHTML += `
-                    <dl>
+                fetch('/stock/' + name).then(res => res.json())
+                .then(history => {
+                    elmStockList.innerHTML += `
                         <dt>${name}</dt>
                         <dd>$${stock.value}</dd>
                         <dd>
@@ -78,7 +109,27 @@
                             <button onclick="tran('${name}', true)">Buy</button>
                             <button onclick="tran('${name}', false)">Sell</button>
                         </dd>
-                    </dl>`;
+                        <dd id="${name}-chart"></dd>`;
+                    new CanvasJS.Chart(name + '-chart', {
+                        title: { text: name },
+                        zoomEnabled: true,
+                        axisY: {
+                            includeZero: false,
+                            title: "Prices",
+                            prefix: "$"
+                        },
+                        axisX: {
+                            valueFormatString: "#",
+                            labelAngle: -90,
+                            minimum: -1,
+                            maximum: history.length, // fix because bug for some reason
+                        },
+                        data: [{
+                            type: "candlestick",
+                            dataPoints: stockHistory(history)
+                        }]
+                    }).render();
+                })
             }
         }).then(updatePlayer());
     }

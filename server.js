@@ -4,10 +4,15 @@ const path = require('path');
 const app = express();
 const port = 8080;
 
+// game settings
+const PASSES_PER_DAY = 4; // how many passes for a day for chart
+
 class Stock {
     constructor(name, url) {
         this.name = name;
         this.url = url;
+        this.history = [];
+        this.passes = 0; // how many pass was invoked?
         this.pass(); // initial value
     }
     pass() {
@@ -74,7 +79,7 @@ app.get('/stocks', (req, res) => {
 
 app.get('/stock/:name', (req, res) => {
     let name = req.params.name;
-    res.send();
+    res.send(JSON.stringify(STOCK_LIST[name].history));
 })
 
 app.get('/player', (req, res) => {
@@ -84,7 +89,24 @@ app.get('/player', (req, res) => {
 // action route
 app.get('/pass', (req, res) => {
     let changes = ''; // respond changes
-    for (const name in STOCK_LIST) STOCK_LIST[name].pass().then(val => changes += name + ': $' + val + '\n');
+    for (const name in STOCK_LIST) 
+        STOCK_LIST[name].pass()
+        .then(val => {
+            let stock = STOCK_LIST[name];
+            if (stock.passes % PASSES_PER_DAY == 0) {
+                // new day
+                stock.history.push([
+                    val, val, val, val
+                ])
+            } else {
+                // still same day
+                let today = stock.history.at(-1);
+                if (today[1] < val) today[1] = val; // high
+                else if (today[2] > val) today[2] = val; // low
+                today[3] = val; // close values
+            }
+            stock.passes++;
+        });
     res.send('ok');
 })
 
