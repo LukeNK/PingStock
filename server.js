@@ -51,7 +51,8 @@ const PASSES_PER_DAY = 10; // how many passes for a day for chart
 let STOCK_LIST = {
     CAPM: 'https://pm.gc.ca/en',
     CANGOV: 'https://www.canada.ca/',
-    DISC: 'https://discord.com/'
+    DISC: 'https://discord.com/',
+    EXPL: 'http://example.com/'
 }
 let PLAYER = new Client(10000);
 

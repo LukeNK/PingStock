@@ -13,6 +13,10 @@
             --font-size: 19px
         }
 
+        .colorBright {
+            color: var(--color-bright);
+        }
+
         html {
             font-family: var(--font-family);
             font-size: var(--font-size);
@@ -99,10 +103,16 @@
         .then(res => {
             // remove old result
             elmStockList.innerHTML = '';
+            // sort array
+            // if player own the stock, append it to the beginging
+            for (let l1 = 0; l1 < res.length; l1++)
+                if (res[l1].amount)
+                    res.unshift(res.splice(l1, 1)[0])
+            // add UI
             for (const stock of res) {
                 let name = stock.name;
                 elmStockList.innerHTML += `
-                    <dt>${name}</dt>
+                    <dt ${stock.amount? ' class="colorBright"' : ''}>${name}</dt>
                     <dd>$${stock.value}</dd>
                     <dd>
                         <input id="${name}" type="Number" value="${stock.amount}">
