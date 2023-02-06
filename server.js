@@ -4,9 +4,6 @@ const path = require('path');
 const app = express();
 const port = 8080;
 
-// game settings
-const PASSES_PER_DAY = 4; // how many passes for a day for chart
-
 class Stock {
     constructor(name, url) {
         this.name = name;
@@ -45,9 +42,13 @@ class Client {
     }
 }
 
+// game settings
+const PASSES_PER_DAY = 4; // how many passes for a day for chart
 // all stock available
 let STOCK_LIST = {
-    CAPM: 'https://pm.gc.ca/en'
+    CAPM: 'https://pm.gc.ca/en',
+    CANGOV: 'https://www.canada.ca/',
+    DISC: 'https://discord.com/'
 }
 let PLAYER = new Client(10000);
 

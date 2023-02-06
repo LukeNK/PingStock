@@ -99,37 +99,16 @@
             elmStockList.innerHTML = '';
             for (const stock of res) {
                 let name = stock.name;
-                fetch('/stock/' + name).then(res => res.json())
-                .then(history => {
-                    elmStockList.innerHTML += `
-                        <dt>${name}</dt>
-                        <dd>$${stock.value}</dd>
-                        <dd>
-                            <input id="${name}" type="Number" value="${stock.amount}">
-                            <button onclick="tran('${name}', true)">Buy</button>
-                            <button onclick="tran('${name}', false)">Sell</button>
-                        </dd>
-                        <dd id="${name}-chart"></dd>`;
-                    new CanvasJS.Chart(name + '-chart', {
-                        title: { text: name },
-                        zoomEnabled: true,
-                        axisY: {
-                            includeZero: false,
-                            title: "Prices",
-                            prefix: "$"
-                        },
-                        axisX: {
-                            valueFormatString: "#",
-                            labelAngle: -90,
-                            minimum: -1,
-                            maximum: history.length, // fix because bug for some reason
-                        },
-                        data: [{
-                            type: "candlestick",
-                            dataPoints: stockHistory(history)
-                        }]
-                    }).render();
-                })
+                elmStockList.innerHTML += `
+                    <dt>${name}</dt>
+                    <dd>$${stock.value}</dd>
+                    <dd>
+                        <input id="${name}" type="Number" value="${stock.amount}">
+                        <button onclick="tran('${name}', true)">Buy</button>
+                        <button onclick="tran('${name}', false)">Sell</button>
+                        <button onclick="showChart('${name}', this)">Show chart</button>
+                    </dd>
+                    <dd id="${name}-chart"></dd>`;
             }
         }).then(updatePlayer());
     }
@@ -157,6 +136,44 @@
             })
         }).then(res => res.text())
         .then(updateStock())
+    }
+
+    function showChart(name, btn) {
+        if (btn.innerHTML == 'Show chart') {
+            // if invoking to show chart
+            btn.innerHTML = 'Hide chart';
+            fetch('/stock/' + name).then(res => res.json())
+            .then(history => {
+                new CanvasJS.Chart(name + '-chart', {
+                    title: { text: name },
+                    theme: 'dark1',
+                    backgroundColor: '#04151f',
+                    zoomEnabled: true,
+                    axisY: {
+                        includeZero: false,
+                        title: 'Value',
+                        prefix: "$"
+                    },
+                    axisX: {
+                        interval: 1,
+                        valueFormatString: "#",
+                        labelAngle: -90,
+                        minimum: Math.max(-1, history.length - 10),
+                        maximum: history.length, // fix because bug for some reason
+                    },
+                    data: [{
+                        type: "candlestick",
+                        risingColor: "green",
+                        color: "red",
+                        dataPoints: stockHistory(history)
+                    }]
+                }).render();
+            });
+        } else {
+            // hide chart
+            btn.innerHTML = 'Show chart';
+            document.getElementById(name + '-chart').innerHTML = ''
+        }
     }
 
     passStock(); // run once before interval
