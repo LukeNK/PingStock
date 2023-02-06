@@ -23,6 +23,8 @@ class Client {
     constructor(money) {
         this.money = money;
         this.stocks = [];
+        this.feePerTran = 30;
+        this.feePerStock = 10;
     }
     /**
      * Buy or sell a stock
@@ -34,10 +36,11 @@ class Client {
         if (typeof(stock) == 'string') 
             stock = STOCK_LIST[stock];
         let price = stock.value * amount;
-        this.money -= price;
+        this.money -= price ;
         // if stock never init before
         if (!this.stocks[stock.name]) this.stocks[stock.name] = 0;
         this.stocks[stock.name] += amount;
+        this.money -= (this.feePerTran + this.feePerStock * amount);
         return price;
     }
 }
@@ -89,7 +92,6 @@ app.get('/player', (req, res) => {
 
 // action route
 app.get('/pass', (req, res) => {
-    let changes = ''; // respond changes
     for (const name in STOCK_LIST) 
         STOCK_LIST[name].pass()
         .then(val => {
